@@ -163,4 +163,64 @@ $("refreshBtn").addEventListener("click",loadOrders);
 $("clearBtn").addEventListener("click",()=>{$("search").value="";$("categoryFilter").value="all";$("statusFilter").value="all";render()});
 if("serviceWorker" in navigator && location.protocol.startsWith("http"))window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(console.warn));
 </script>
+<style>
+#hrSplash{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:999999;
+  background:#101b3d;
+  color:white;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  font-family:Arial,sans-serif;
+}
+@media (display-mode: standalone){
+  #hrSplash{display:flex}
+}
+#hrSplash img{
+  width:110px;
+  height:110px;
+  border-radius:25px;
+  margin-bottom:20px;
+}
+#hrSplash h2{
+  letter-spacing:2px;
+  margin:5px;
+}
+#hrSplash p{
+  color:#b9c8ee;
+  font-size:13px;
+}
+.hrLoader{
+  width:35px;
+  height:35px;
+  border:4px solid #526080;
+  border-top-color:white;
+  border-radius:50%;
+  animation:hrSpin .8s linear infinite;
+  margin-top:25px;
+}
+@keyframes hrSpin{
+  to{transform:rotate(360deg)}
+}
+</style>
+
+<div id="hrSplash">
+  <img src="./icon-512.png" alt="HR">
+  <h2>HR TOP UP</h2>
+  <p>ADMIN PANEL</p>
+  <div class="hrLoader"></div>
+</div>
+
+<script>
+if(window.matchMedia("(display-mode: standalone)").matches){
+  window.addEventListener("load",()=>{
+    setTimeout(()=>{
+      document.getElementById("hrSplash").style.display="none";
+    },2200);
+  });
+}
+</script>
 </body></html>
