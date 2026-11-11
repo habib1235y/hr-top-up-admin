@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101b3d">
+<meta name="description" content="HR TOP UP private admin panel">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<title>HR TOP UP | Admin</title>
+<style>
+:root{--navy:#101b3d;--blue:#1747a8;--red:#850b0b;--bg:#f2f5fb;--line:#dce3ef;--muted:#68738a;--green:#16784b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:system-ui,"Noto Sans Bengali",sans-serif;color:#17223d}
+header{background:linear-gradient(110deg,#101b3d,#1747a8);color:#fff;padding:18px max(16px,calc((100% - 1100px)/2));display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-size:20px;font-weight:900;letter-spacing:.3px}.brand small{display:block;font-size:10px;letter-spacing:3px;opacity:.8}
+main{max-width:1100px;margin:24px auto;padding:0 14px}.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 8px 25px #1b31500d}
+.login{max-width:430px;margin:8vh auto}.login h1{margin:0 0 6px}.muted{color:var(--muted);font-size:13px}
+label{display:block;font-size:13px;font-weight:700;margin:14px 0 6px}input,select{width:100%;padding:13px;border:1px solid #cbd5e4;border-radius:10px;background:#fff;font:inherit;color:#17223d}
+button{border:0;border-radius:10px;padding:12px 16px;font:700 14px system-ui;cursor:pointer;background:var(--red);color:#fff}
+button.secondary{background:#e9eef8;color:#17223d}button:disabled{opacity:.55;cursor:wait}
+.row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.row>*{flex:1}.row button{flex:0 0 auto}
+#message{margin-top:12px;color:var(--red);font-size:13px;white-space:pre-wrap}
+.hidden{display:none!important}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}
+.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px}.stat span{display:block;color:var(--muted);font-size:12px}.stat strong{font-size:25px}
+.filters{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:10px;margin:16px 0}
+.orders{display:grid;gap:12px}.order{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}
+.order-top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.order h3{margin:0;font-size:16px}
+.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.meta div{background:#f5f7fb;border-radius:9px;padding:9px;font-size:12px;overflow-wrap:anywhere}.meta b{display:block;font-size:13px;margin-top:3px}
+.status{font-size:11px;font-weight:800;border-radius:20px;padding:5px 9px;background:#fff1cc;color:#805600}
+.status.reviewing{background:#e8edff;color:#254ba8}.status.cancelled{background:#ffe6e6;color:#a12222}
+.empty{text-align:center;color:var(--muted);padding:35px}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:25px}
+@media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}.filters{grid-template-columns:1fr 1fr}.filters input{grid-column:1/-1}.meta{grid-template-columns:1fr 1fr}header{padding:15px}.order-top .row{width:100%}.order-top .row select{min-width:130px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand">HR TOP UP <small>PRIVATE ADMIN PANEL</small></div>
+ <button id="logoutBtn" class="secondary hidden">Logout</button>
+</header>
+<main>
+ <section id="loginPanel" class="panel login">
+  <h1>Admin Login</h1><p class="muted">শুধু অনুমোদিত Admin অ্যাকাউন্ট দিয়ে প্রবেশ করুন।</p>
+  <form id="loginForm">
+   <label for="email">Admin Email</label><input id="email" type="email" autocomplete="username" required placeholder="তোমার Admin email">
+   <label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required placeholder="Password">
+   <button id="loginBtn" type="submit" style="width:100%;margin-top:18px">Login</button>
+  </form>
+  <div id="message"></div>
+ </section>
+ <section id="dashboard" class="hidden">
+  <div class="row" style="justify-content:space-between">
+   <div><h1 style="margin:0">Orders Dashboard</h1><div class="muted" id="welcome">Admin</div></div>
+   <button id="refreshBtn" class="secondary">↻ Refresh Orders</button>
+  </div>
+  <div class="stats">
+   <div class="stat"><span>Total Orders</span><strong id="totalCount">0</strong></div>
+   <div class="stat"><span>Pending</span><strong id="pendingCount">0</strong></div>
+   <div class="stat"><span>Reviewing</span><strong id="reviewingCount">0</strong></div>
+   <div class="stat"><span>Cancelled</span><strong id="cancelledCount">0</strong></div>
+  </div>
+  <div class="panel">
+   <div class="filters">
+    <input id="search" placeholder="Order / Player ID / Customer UID খুঁজুন">
+    <select id="categoryFilter">
+     <option value="all">সব Category</option>
+     <option value="diamond">Diamond Top Up</option>
+     <option value="efootball">eFootball</option>
+     <option value="eFootball Coins">eFootball Coins</option>
+     <option value="Match Pass">Match Pass</option>
+     <option value="Items">Items</option>
+     <option value="Special Pack">Special Pack</option>
+    </select>
+    <select id="statusFilter">
+     <option value="all">সব Status</option><option value="pending">Pending</option><option value="reviewing">Reviewing</option><option value="cancelled">Cancelled</option>
+    </select>
+    <button id="clearBtn" class="secondary">Clear</button>
+   </div>
+   <div id="loadMessage" class="muted">Orders লোড হচ্ছে…</div>
+   <div id="orders" class="orders"></div>
+  </div>
+ </section>
+</main>
+<footer>HR TOP UP • Admin access is protected by Firebase Authentication and Firestore Rules.</footer>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import {getAuth,onAuthStateChanged,signInWithEmailAndPassword,signOut} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import {getFirestore,collectionGroup,getDocs,doc,updateDoc} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+const firebaseConfig={
+ apiKey:"AIzaSyBkecElzIG5-vmUo1vhZZA1s_WyznrysNI",
+ authDomain:"hr-top-up-cf1a0.firebaseapp.com",
+ projectId:"hr-top-up-cf1a0",
+ storageBucket:"hr-top-up-cf1a0.firebasestorage.app",
+ messagingSenderId:"921416158216",
+ appId:"1:921416158216:web:743312f3d37524528c15bd",
+ measurementId:"G-XQ6F92BPR1"
+};
+const ADMIN_UID="ThuaIcB7NZgQf22VTnIlcFncTAG3";
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
+const $=id=>document.getElementById(id);
+let allOrders=[];
+function message(t){$("message").textContent=t}
+function showLogin(){ $("loginPanel").classList.remove("hidden");$("dashboard").classList.add("hidden");$("logoutBtn").classList.add("hidden"); }
+function showDashboard(user){$("loginPanel").classList.add("hidden");$("dashboard").classList.remove("hidden");$("logoutBtn").classList.remove("hidden");$("welcome").textContent="Logged in: "+user.email;loadOrders();}
+$("loginForm").addEventListener("submit",async e=>{
+ e.preventDefault();$("loginBtn").disabled=true;message("Login হচ্ছে…");
+ try{await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);message("")}
+ catch(err){message("Login হয়নি: "+err.message)}
+ finally{$("loginBtn").disabled=false}
+});
+$("logoutBtn").addEventListener("click",()=>signOut(auth));
+onAuthStateChanged(auth,user=>{
+ if(!user){showLogin();return}
+ if(user.uid!==ADMIN_UID){signOut(auth);showLogin();message("এই Account-এ Admin অনুমতি নেই।");return}
+ showDashboard(user);
+});
+async function loadOrders(){
+ $("loadMessage").textContent="Orders লোড হচ্ছে…";$("refreshBtn").disabled=true;
+ try{
+  const snap=await getDocs(collectionGroup(db,"orders"));
+  allOrders=snap.docs.map(d=>{
+   const x=d.data();
+   return {id:d.id,customerId:d.ref.parent.parent?.id||"",playerId:x.playerId||"",name:x.packageName||x.packageId||"Unknown package",price:Number(x.price)||0,method:x.paymentMethod||"Not recorded",category:x.category||"diamond",productType:x.productType||(x.category==="efootball"?"eFootball":"Diamond Top Up"),status:x.status||"pending",createdAt:x.createdAt?.toDate?.()||null,path:d.ref.path};
+  }).sort((a,b)=>(b.createdAt?.getTime()||0)-(a.createdAt?.getTime()||0));
+  $("loadMessage").textContent=allOrders.length+"টি Order পাওয়া গেছে।";
+  render();
+ }catch(err){$("loadMessage").textContent="Order লোড হয়নি: "+err.message+" — Firestore Rules পরীক্ষা করতে হবে।"}
+ finally{$("refreshBtn").disabled=false}
+}
+function render(){
+ const q=$("search").value.trim().toLowerCase(),cat=$("categoryFilter").value,st=$("statusFilter").value;
+ const filtered=allOrders.filter(o=>{
+  const matchQ=!q||[o.id,o.playerId,o.customerId,o.name].some(v=>String(v).toLowerCase().includes(q));
+  const matchCat=cat==="all"||o.category===cat||o.productType===cat;
+  const matchSt=st==="all"||o.status===st;return matchQ&&matchCat&&matchSt;
+ });
+ $("totalCount").textContent=allOrders.length;
+ $("pendingCount").textContent=allOrders.filter(o=>o.status==="pending").length;
+ $("reviewingCount").textContent=allOrders.filter(o=>o.status==="reviewing").length;
+ $("cancelledCount").textContent=allOrders.filter(o=>o.status==="cancelled").length;
+ $("orders").innerHTML=filtered.length?filtered.map(o=>`
+ <article class="order">
+  <div class="order-top"><div><h3>${escapeHtml(o.name)} <span class="status ${o.status}">${escapeHtml(o.status)}</span></h3><div class="muted">${escapeHtml(o.productType)} • ${o.createdAt?o.createdAt.toLocaleString():"তারিখ নেই"}</div></div>
+   <div class="row" style="max-width:220px"><select data-status="${escapeAttr(o.id)}" aria-label="Update status"><option value="pending" ${o.status==="pending"?"selected":""}>Pending</option><option value="reviewing" ${o.status==="reviewing"?"selected":""}>Reviewing</option><option value="cancelled" ${o.status==="cancelled"?"selected":""}>Cancelled</option></select><button data-save="${escapeAttr(o.id)}">Save</button></div>
+  </div>
+  <div class="meta"><div>Order ID<b>${escapeHtml(o.id)}</b></div><div>Player ID<b>${escapeHtml(o.playerId)}</b></div><div>Customer UID<b>${escapeHtml(o.customerId)}</b></div><div>Price<b>৳${o.price}</b></div><div>Payment Method<b>${escapeHtml(o.method)}</b></div><div>Database Path<b style="font-size:10px">${escapeHtml(o.path)}</b></div></div>
+ </article>`).join(""):'<div class="empty">এই Filter-এ কোনো Order নেই।</div>';
+ document.querySelectorAll("[data-save]").forEach(b=>b.addEventListener("click",()=>saveStatus(b.dataset.save)));
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function escapeAttr(s){return escapeHtml(s)}
+async function saveStatus(id){
+ const order=allOrders.find(o=>o.id===id);if(!order)return;
+ const sel=document.querySelector(`[data-status="${CSS.escape(id)}"]`),next=sel?.value;
+ if(!["pending","reviewing","cancelled"].includes(next))return;
+ try{await updateDoc(doc(db,order.path),{status:next});order.status=next;$("loadMessage").textContent="Order Status আপডেট হয়েছে।";render()}
+ catch(err){alert("Status update হয়নি: "+err.message+" — Firestore Rules পরীক্ষা করুন।")}
+}
+$("refreshBtn").addEventListener("click",loadOrders);
+["search","categoryFilter","statusFilter"].forEach(id=>$(id).addEventListener(id==="search"?"input":"change",render));
+$("clearBtn").addEventListener("click",()=>{$("search").value="";$("categoryFilter").value="all";$("statusFilter").value="all";render()});
+if("serviceWorker" in navigator && location.protocol.startsWith("http"))window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(console.warn));
+</script>
+</body></html>
